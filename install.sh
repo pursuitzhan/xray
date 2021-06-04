@@ -409,7 +409,7 @@ function start_menu(){
     green " ====================================================="
     green " 描述：xray + tcp + xtls一键安装脚本"
     green " 系统：支持centos7/debian9+/ubuntu16.04+     "
-    green " 作者：atrandys  www.atrandys.com"
+    green " 作者：atrandys  www.atrandys.com  端口修改443->1026"
     green " ====================================================="
     echo
     green " 1. 安装 xray + tcp + xtls"
