@@ -65,6 +65,7 @@ check_release(){
             green "$(date +"%Y-%m-%d %H:%M:%S") - FireWalld状态非disabled,添加80/443到FireWalld rules."
             firewall-cmd --zone=public --add-port=80/tcp --permanent
             firewall-cmd --zone=public --add-port=443/tcp --permanent
+            firewall-cmd --zone=public --add-port=1026/tcp --permanent
             firewall-cmd --reload
         fi
         while [ ! -f "nginx-release-centos-7-0.el7.ngx.noarch.rpm" ]
@@ -219,7 +220,7 @@ cat > /usr/local/etc/xray/config.json<<-EOF
     "inbounds": [
         {
             "listen": "0.0.0.0", 
-            "port": 443, 
+            "port": 1026, 
             "protocol": "vless", 
             "settings": {
                 "clients": [
@@ -290,7 +291,7 @@ cat > /usr/local/etc/xray/client.json<<-EOF
                 "vnext": [
                     {
                         "address": "$your_domain",
-                        "port": 443,
+                        "port": 1026,
                         "users": [
                             {
                                 "id": "$v2uuid",
@@ -329,7 +330,7 @@ EOF
 cat > /usr/local/etc/xray/myconfig.json<<-EOF
 {
 地址：${your_domain}
-端口：443
+端口：1026
 id：${v2uuid}
 加密：none
 流控：xtls-rprx-direct
