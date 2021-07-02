@@ -65,7 +65,7 @@ check_release(){
             green "$(date +"%Y-%m-%d %H:%M:%S") - FireWalld状态非disabled,添加80/443到FireWalld rules."
             firewall-cmd --zone=public --add-port=80/tcp --permanent
             firewall-cmd --zone=public --add-port=443/tcp --permanent
-            firewall-cmd --zone=public --add-port=1026/tcp --permanent
+            firewall-cmd --zone=public --add-port=1028/tcp --permanent
             firewall-cmd --reload
         fi
         while [ ! -f "nginx-release-centos-7-0.el7.ngx.noarch.rpm" ]
@@ -94,6 +94,7 @@ check_release(){
         if [ -n "$ufw_status" ]; then
             ufw allow 80/tcp
             ufw allow 443/tcp
+            ufw allow 1028/tcp
             ufw reload
         fi
         apt-get update >/dev/null 2>&1
@@ -103,6 +104,7 @@ check_release(){
         if [ -n "$ufw_status" ]; then
             ufw allow 80/tcp
             ufw allow 443/tcp
+            ufw allow 1028/tcp
             ufw reload
         fi
         apt-get update >/dev/null 2>&1
@@ -125,6 +127,11 @@ check_port(){
     if [ -n "$Port443" ]; then
         process443=`netstat -tlpn | awk -F '[: ]+' '$5=="443"{print $9}'`
         red "$(date +"%Y-%m-%d %H:%M:%S") - 443端口被占用,占用进程:${process443}.\n== Install failed."
+        exit 1
+    fi
+    if [ -n "$Port1028" ]; then
+        process1028=`netstat -tlpn | awk -F '[: ]+' '$5=="1028"{print $9}'`
+        red "$(date +"%Y-%m-%d %H:%M:%S") - 1028端口被占用,占用进程:${process1028}.\n== Install failed."
         exit 1
     fi
 }
@@ -220,7 +227,7 @@ cat > /usr/local/etc/xray/config.json<<-EOF
     "inbounds": [
         {
             "listen": "0.0.0.0", 
-            "port": 1026, 
+            "port": 1028, 
             "protocol": "vless", 
             "settings": {
                 "clients": [
@@ -291,7 +298,7 @@ cat > /usr/local/etc/xray/client.json<<-EOF
                 "vnext": [
                     {
                         "address": "$your_domain",
-                        "port": 1026,
+                        "port": 1028,
                         "users": [
                             {
                                 "id": "$v2uuid",
@@ -330,7 +337,7 @@ EOF
 cat > /usr/local/etc/xray/myconfig.json<<-EOF
 {
 地址：${your_domain}
-端口：1026
+端口：1028
 id：${v2uuid}
 加密：none
 流控：xtls-rprx-direct
