@@ -36,6 +36,7 @@ install_wordpress(){
     fi
     iptables -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
     iptables -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+    iptables -A INPUT -p tcp -m tcp --dport 1028 -j ACCEPT
     iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
     iptables -A INPUT -i lo -j ACCEPT
     iptables -P INPUT DROP
@@ -245,6 +246,7 @@ check_port(){
     $systemPackage -y install net-tools
     Port80=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 80`
     Port443=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 443`
+    Port1028=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 1028`
     if [ -n "$Port80" ]; then
         process80=`netstat -tlpn | awk -F '[: ]+' '$5=="80"{print $9}'`
         red "$(date +"%Y-%m-%d %H:%M:%S") - 80端口被占用,占用进程:${process80}\n== Install failed."
@@ -252,6 +254,11 @@ check_port(){
     fi
     if [ -n "$Port443" ]; then
         process443=`netstat -tlpn | awk -F '[: ]+' '$5=="443"{print $9}'`
+        red "$(date +"%Y-%m-%d %H:%M:%S") - 443端口被占用,占用进程:${process443}.\n== Install failed."
+        exit 1
+    fi
+    if [ -n "$Port1028" ]; then
+        process443=`netstat -tlpn | awk -F '[: ]+' '$5=="1028"{print $9}'`
         red "$(date +"%Y-%m-%d %H:%M:%S") - 443端口被占用,占用进程:${process443}.\n== Install failed."
         exit 1
     fi
@@ -356,14 +363,14 @@ cat > /usr/local/etc/xray/config.json<<-EOF
     "inbounds": [
         {
             "listen": "0.0.0.0", 
-            "port": 443, 
+            "port": 1028, 
             "protocol": "vless", 
             "settings": {
                 "clients": [
                     {
                         "id": "$v2uuid", 
                         "level": 0, 
-                        "email": "a@b.com",
+                        "email": "c@b.com",
                         "flow":"xtls-rprx-direct"
                     }
                 ], 
@@ -424,7 +431,7 @@ cat > /usr/local/etc/xray/client.json<<-EOF
                 "vnext": [
                     {
                         "address": "$your_domain",
-                        "port": 443,
+                        "port": 1028,
                         "users": [
                             {
                                 "id": "$v2uuid",
@@ -461,7 +468,7 @@ EOF
 cat > /usr/local/etc/xray/myconfig.json<<-EOF
 {
 地址：${your_domain}
-端口：443
+端口：1028
 id：${v2uuid}
 加密：none
 流控：xtls-rprx-origin
